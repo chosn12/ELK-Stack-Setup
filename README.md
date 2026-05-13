@@ -167,16 +167,18 @@ filter {
     }
   }
 }
-
 output {
   elasticsearch {
-    hosts    => ["http://elasticsearch:9200"]
-    index    => "syslog-%{+YYYY.MM.dd}"
-    type     => "_doc"
+    hosts => ["http://elasticsearch:9200"]
+    index => "syslog-%{+YYYY.MM.dd}"
+    retry_initial_interval => 5
+    retry_max_interval => 30
+    timeout => 60
   }
-  # Debug: mirror to stdout during testing
   stdout { codec => rubydebug }
 }
+
+
 ```
 
 > **How it works:** The `syslog` input plugin handles RFC 3164 and RFC 5424 automatically. The `grok` filter parses fields into named keys. The daily index pattern (`syslog-YYYY.MM.dd`) is the industry standard for rolling log retention.
