@@ -17,7 +17,7 @@
 ## 📁 Portfolio Output
 
 ```
-week8-elk-setup/
+ELK-Setup/
 ├── docker-compose.yml          # Elasticsearch + Logstash + Kibana
 ├── logstash/
 │   └── pipeline/
