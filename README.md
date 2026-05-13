@@ -283,4 +283,4 @@ Create a visualization to track SSH brute-force and failed sudo attempts — the
 
 ---
 
-*Week 8 of a SOC analyst portfolio project · Stack: Elastic 8.13 · Docker Compose 2.x · Ubuntu 22.04*
+*Cybersecurity project · Stack: Elastic 8.13 · Docker Compose 2.x · Ubuntu 22.04*
