@@ -144,29 +144,45 @@ Logstash uses a pipeline config to define how logs enter (**input**), how they a
 # logstash/pipeline/syslog.conf
 
 input {
-  syslog {
+  udp {
     port => 5514
     type => "syslog"
   }
 }
 
 filter {
-  # Parse auth log fields for failed login detection
-  if [program] =~ /sshd|sudo|su/ {
-    grok {
-      match => {
-        "message" => "%{SYSLOGTIMESTAMP:ts} %{WORD:host} %{WORD:program}\[%{NUMBER:pid}\]: %{GREEDYDATA:msg}"
-      }
-    }
+  # Tag successful SSH logins
+  if "Accepted password" in [message] {
+    mutate { add_tag => ["auth_success"] }
   }
 
-  # Tag authentication failures
-  if [message] =~ /[Ff]ailed|[Ii]nvalid|[Aa]uthentication failure/ {
+  # Tag and parse failed SSH logins
+  if "Failed password" in [message] {
+    grok {
+      match => {
+        "message" => [
+          "^<%{INT:syslog_pri}>%{MONTH:month} +%{MONTHDAY:day} %{TIME:time} %{HOSTNAME:syslog_host} %{DATA:program}\[%{NUMBER:pid}\]: Failed password for (invalid user )?%{USERNAME:auth_username} from %{IP:auth_source_ip} port %{NUMBER:auth_port} ssh2$",
+          "^<%{INT:syslog_pri}>%{INT:version} %{TIMESTAMP_ISO8601:syslog_timestamp} %{HOSTNAME:syslog_host} %{WORD:program} %{NUMBER:pid} - - Failed password for (invalid user )?%{USERNAME:auth_username} from %{IP:auth_source_ip} port %{NUMBER:auth_port} ssh2$",
+          "^<%{INT:syslog_pri}>%{MONTH:month} +%{MONTHDAY:day} %{TIME:time} %{HOSTNAME:syslog_host} %{DATA:program}\[%{NUMBER:pid}\]: Failed password for (invalid user )?%{USERNAME:auth_username} from %{IP:auth_source_ip} port %{NUMBER:auth_port}$"
+        ]
+      }
+    }
+
     mutate {
       add_tag => ["auth_failure"]
     }
   }
+
+  # GeoIP only for failed logins
+  if "auth_failure" in [tags] {
+    geoip {
+      source => "auth_source_ip"
+      target => "geoip"
+      database => "/usr/share/GeoIP/GeoLite2-City.mmdb"
+    }
+  }
 }
+
 output {
   elasticsearch {
     hosts => ["http://elasticsearch:9200"]
@@ -177,6 +193,7 @@ output {
   }
   stdout { codec => rubydebug }
 }
+
 
 
 ```
