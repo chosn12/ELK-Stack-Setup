@@ -73,7 +73,7 @@ Scaffold the directory layout. The Logstash pipeline directory is mounted as a v
 
 ```bash
 mkdir -p week8-elk-setup/logstash/pipeline
-cd week8-elk-setup
+cd elk-setup
 ```
 
 ---
