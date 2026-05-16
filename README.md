@@ -231,7 +231,7 @@ echo '*.* @DOCKER_HOST_IP:5514' | sudo tee /etc/rsyslog.d/50-logstash.conf
 sudo systemctl restart rsyslog
 
 # Generate a test auth failure
-logger -p auth.warning "Failed password for invalid user testuser from 192.168.1.1 port 22 ssh2"
+logger -p auth.warning "Failed password for invalid user testuser from <ip address> port 22 ssh2"
 ```
 
 > **How forwarding works:** The `@` prefix in rsyslog means UDP. Use `@@` for TCP. The `*.*` wildcard forwards all facilities and severities — you can narrow this to `auth.*` once you've confirmed end-to-end flow.
@@ -302,4 +302,4 @@ Create a visualization to track SSH brute-force and failed sudo attempts — the
 
 ---
 
-*Cybersecurity project · Stack: Elastic 8.13 · Docker Compose 2.x · Ubuntu 22.04*
+*Cybersecurity project · Stack: Elastic 8.13 · Docker Compose 2.x · Ubuntu 26.04*
